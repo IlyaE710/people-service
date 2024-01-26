@@ -1,4 +1,4 @@
-basePath: /api
+basePath: ${SWAGGER_BASE_PATH}
 definitions:
   dto.CountryRequest:
     properties:
@@ -46,6 +46,10 @@ definitions:
         type: integer
       name:
         type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
     type: object
   dto.UpdatePeopleRequest:
     properties:
@@ -66,7 +70,7 @@ definitions:
       surname:
         type: string
     type: object
-host: localhost:8080
+host: ${SWAGGER_HOST}
 info:
   contact:
     email: support@swagger.io

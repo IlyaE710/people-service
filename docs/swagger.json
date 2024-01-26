@@ -15,8 +15,8 @@
         },
         "version": "1.0"
     },
-    "host": "localhost:8080",
-    "basePath": "/api",
+    "host": "${SWAGGER_HOST}",
+    "basePath": "${SWAGGER_BASE_PATH}",
     "paths": {
         "/v1/people": {
             "post": {
@@ -302,6 +302,12 @@
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "surname": {
                     "type": "string"
                 }
             }
