@@ -35,8 +35,6 @@ func main() {
 
 	r := app.SetupServer(*serviceLocator)
 
-	logrus.Info("run server")
-
 	addr := os.Getenv("SERVER_ADDRESS")
 	if addr == "" {
 		addr = ":8080"

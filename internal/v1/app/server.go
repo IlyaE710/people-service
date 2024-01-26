@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"people/internal/v1/handler/people"
@@ -27,6 +28,8 @@ func SetupServer(serviceLocator ServiceLocator) *gin.Engine {
 	}
 
 	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	logrus.Info("Server setup complete")
 
 	return r
 }
