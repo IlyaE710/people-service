@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/sirupsen/logrus"
+	"os"
 	_ "people/docs"
 	"people/internal/v1/app"
 )
@@ -22,6 +23,7 @@ import (
 // @BasePath  /api
 
 func main() {
+	app.SetupEnvironment()
 	app.SetupLogger()
 
 	db, err := app.SetupDatabase()
@@ -34,5 +36,12 @@ func main() {
 	r := app.SetupServer(*serviceLocator)
 
 	logrus.Info("run server")
-	r.Run(":8080")
+
+	addr := os.Getenv("SERVER_ADDRESS")
+	if addr == "" {
+		addr = ":8080"
+	}
+
+	logrus.Infof("Запуск сервера на адресе %s", addr)
+	r.Run(addr)
 }
