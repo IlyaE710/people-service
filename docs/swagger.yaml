@@ -1,0 +1,224 @@
+basePath: /api
+definitions:
+  dto.CountryRequest:
+    properties:
+      country-id:
+        type: string
+      id:
+        type: integer
+      probability:
+        type: number
+    type: object
+  dto.CountryResponse:
+    properties:
+      country-id:
+        type: string
+      id:
+        type: integer
+      probability:
+        type: number
+    type: object
+  dto.CreatePeopleRequest:
+    properties:
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  dto.PeopleResponse:
+    properties:
+      age:
+        type: integer
+      country:
+        items:
+          $ref: '#/definitions/dto.CountryResponse'
+        type: array
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  dto.UpdatePeopleRequest:
+    properties:
+      age:
+        type: integer
+      country:
+        items:
+          $ref: '#/definitions/dto.CountryRequest'
+        type: array
+      gender:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      patronymic:
+        type: string
+      surname:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: This is a sample server celler server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /v1/people:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового пользователя с использованием предоставленных данных
+      parameters:
+      - description: Данные для создания пользователя
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePeopleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Success
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Создание нового пользователя
+      tags:
+      - People
+  /v1/people/:
+    get:
+      description: Получает список всех людей.
+      operationId: get-all-people
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/dto.PeopleResponse'
+              type: array
+            type: array
+        "404":
+          description: Человек не найден
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Получение списка всех людей
+      tags:
+      - People
+    put:
+      consumes:
+      - application/json
+      description: Обновляет информацию о человеке на основе переданных данных.
+      parameters:
+      - description: Данные для обновления пользователя
+        in: body
+        name: updateRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePeopleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Обновление данных о человеке
+      tags:
+      - People
+  /v1/people/{id}:
+    delete:
+      description: Удаляет человека по указанному идентификатору.
+      operationId: delete-people
+      parameters:
+      - description: Идентификатор человека
+        format: int64
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Invalid ID format
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Удалить человека
+      tags:
+      - People
+  /v1/people/{name}:
+    get:
+      description: Получает информацию о человеке по его имени.
+      operationId: get-people-by-name
+      parameters:
+      - description: Имя человека
+        in: path
+        name: name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешный ответ
+          schema:
+            $ref: '#/definitions/dto.PeopleResponse'
+        "400":
+          description: Ошибка запроса
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Человек не найден
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Получение информации о человеке по имени
+      tags:
+      - People
+swagger: "2.0"
