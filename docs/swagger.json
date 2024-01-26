@@ -15,8 +15,8 @@
         },
         "version": "1.0"
     },
-    "host": "${SWAGGER_HOST}",
-    "basePath": "${SWAGGER_BASE_PATH}",
+    "host": "localhost:8080",
+    "basePath": "/api",
     "paths": {
         "/v1/people": {
             "post": {

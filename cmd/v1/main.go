@@ -19,8 +19,8 @@ import (
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
 
-// @host      ${SWAGGER_HOST}
-// @BasePath  ${SWAGGER_BASE_PATH}
+// @host      localhost:8080
+// @BasePath  /api
 
 func main() {
 	app.SetupEnvironment()

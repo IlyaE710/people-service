@@ -57,6 +57,14 @@ func (h *PeopleHandler) GetPeopleByName(c *gin.Context) {
 		})
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"Name":       person.Name,
+		"Surname":    person.Surname,
+		"Patronymic": person.Patronymic,
+		"Age":        person.Age,
+		"Gender":     person.Gender,
+	}).Info("Successful response in GetPeopleByName handler")
+
 	logrus.Info("Person get successfully")
 	c.JSON(http.StatusOK, result)
 }
