@@ -2,6 +2,7 @@ package people
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"people/internal/v1/handler/people/dto"
 	_ "people/internal/v1/handler/people/dto"
@@ -23,13 +24,19 @@ import (
 func (h *PeopleHandler) GetPeopleByName(c *gin.Context) {
 	name := strings.Title(c.Param("name"))
 
+	logrus.WithFields(logrus.Fields{
+		"Name": name,
+	}).Info("Received GetPeopleByNameRequest")
+
 	person, err := h.PeopleService.GetByName(name)
 	if err != nil {
+		logrus.Errorf("Error retrieving person by name: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
 	if person == nil {
+		logrus.Warnf("Person not found by name: %s", name)
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Person not found"})
 		return
 	}
@@ -50,7 +57,7 @@ func (h *PeopleHandler) GetPeopleByName(c *gin.Context) {
 		})
 	}
 
-	// Успешный ответ
+	logrus.Info("Person get successfully")
 	c.JSON(http.StatusOK, result)
 }
 
@@ -65,18 +72,20 @@ func (h *PeopleHandler) GetPeopleByName(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse "Внутренняя ошибка сервера"
 // @Router /v1/people/ [get]
 func (h *PeopleHandler) GetAll(c *gin.Context) {
+	logrus.Info("Received GetAllPeopleRequest")
 	persons, err := h.PeopleService.GetAll()
 	if err != nil {
+		logrus.Errorf("Error retrieving all people: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
 	if persons == nil {
-		// Если человек не найден, возвращаем ошибку 404
+		logrus.Warn("No people found")
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Person not found"})
 		return
 	}
 
-	// Успешный ответ
+	logrus.Info("Persons get successfully")
 	c.JSON(http.StatusOK, persons)
 }
