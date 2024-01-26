@@ -24,9 +24,13 @@ func NewService(
 }
 
 func (s Service) GetByName(name string) (*serviceDto.People, error) {
+	logrus.WithFields(logrus.Fields{
+		"Name": name,
+	}).Info("Service - GetByName")
 	person, err := s.peopleRepository.GetByName(name)
 
 	if err != nil {
+		logrus.Errorf("Error retrieving person by name: %v", err)
 		return nil, err
 	}
 
@@ -51,9 +55,11 @@ func (s Service) GetByName(name string) (*serviceDto.People, error) {
 }
 
 func (s Service) GetAll() ([]*serviceDto.People, error) {
+	logrus.Info("Service - GetAll")
 	peopleList, err := s.peopleRepository.GetAll()
 
 	if err != nil {
+		logrus.Errorf("Error retrieving all people: %v", err)
 		return nil, err
 	}
 
@@ -72,13 +78,24 @@ func (s Service) GetAll() ([]*serviceDto.People, error) {
 }
 
 func (s Service) Delete(people serviceDto.DeletePeople) error {
-
+	logrus.WithFields(logrus.Fields{
+		"ID": people.ID,
+	}).Info("Service - Delete")
 	return s.peopleRepository.Delete(dto.DeletePeople{
 		Id: people.ID,
 	})
 }
 
 func (s Service) Update(people serviceDto.UpdatePeople) error {
+	logrus.WithFields(logrus.Fields{
+		"ID":         people.ID,
+		"Name":       people.Name,
+		"Surname":    people.Name,
+		"Patronymic": people.Name,
+		"Age":        people.Age,
+		"Gender":     people.Gender,
+		"Country":    convertCountry(people.Country),
+	}).Info("Service - Update")
 	p := dto.UpdatePeople{
 		ID:         people.ID,
 		Name:       people.Name,
@@ -88,13 +105,20 @@ func (s Service) Update(people serviceDto.UpdatePeople) error {
 		Gender:     people.Gender,
 		Country:    convertCountry(people.Country),
 	}
-	logrus.Info("Преобразование serviceDto.UpdatePeople в repDto.UpdatePeople", p)
+	logrus.WithFields(logrus.Fields{
+		"UpdateDto": p,
+	}).Info("Service - Conversion of serviceDto.UpdatePeople to repDto.UpdatePeople")
+
 	return s.peopleRepository.Update(p)
 }
 
 func (s Service) Add(people serviceDto.CreatePeople) error {
+	logrus.WithFields(logrus.Fields{
+		"CreatePeople": people,
+	}).Info("Service - Add")
 	response, err := s.externalRepository.GetByName(people.Name)
 	if err != nil {
+		logrus.Errorf("Error adding people: %v", err)
 		return err
 	}
 
