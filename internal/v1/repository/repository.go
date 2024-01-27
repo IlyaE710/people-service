@@ -8,4 +8,6 @@ type PeopleRepository interface {
 	Update(people dto.UpdatePeople) error
 	Add(people dto.CreatePeople) error
 	GetAll() ([]*dto.People, error)
+	GetById(id int) (*dto.People, error)
+	DeleteCountry(people dto.DeletePeople) error
 }

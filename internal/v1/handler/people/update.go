@@ -31,20 +31,14 @@ func (h *PeopleHandler) Update(c *gin.Context) {
 		"ID":         updateRequest.ID,
 		"Name":       updateRequest.Name,
 		"Surname":    updateRequest.Surname,
-		"Age":        updateRequest.Age,
-		"Gender":     updateRequest.Gender,
 		"Patronymic": updateRequest.Patronymic,
-		"Country":    updateRequest.Country,
 	}).Info("Received UpdatePeopleRequest")
 
 	updateDto := serviceDro.UpdatePeople{
 		ID:         updateRequest.ID,
 		Name:       updateRequest.Name,
 		Surname:    updateRequest.Surname,
-		Age:        updateRequest.Age,
-		Gender:     updateRequest.Gender,
 		Patronymic: updateRequest.Patronymic,
-		Country:    convertCountryRequests(updateRequest.Country),
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -61,19 +55,4 @@ func (h *PeopleHandler) Update(c *gin.Context) {
 	logrus.Info("People updated successfully")
 
 	c.JSON(http.StatusOK, gin.H{"message": "People updated successfully"})
-}
-
-// convertCountryRequests конвертирует []handlerDto.CountryRequest в []dto.Country.
-func convertCountryRequests(countryRequests []dto.CountryRequest) []serviceDro.Country {
-	var countries []serviceDro.Country
-
-	for _, countryRequest := range countryRequests {
-		country := serviceDro.Country{
-			CountryID:   countryRequest.CountryID,
-			Probability: countryRequest.Probability,
-		}
-		countries = append(countries, country)
-	}
-
-	return countries
 }

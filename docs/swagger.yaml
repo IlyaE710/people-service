@@ -1,14 +1,5 @@
 basePath: /api
 definitions:
-  dto.CountryRequest:
-    properties:
-      country-id:
-        type: string
-      id:
-        type: integer
-      probability:
-        type: number
-    type: object
   dto.CountryResponse:
     properties:
       country-id:
@@ -53,14 +44,6 @@ definitions:
     type: object
   dto.UpdatePeopleRequest:
     properties:
-      age:
-        type: integer
-      country:
-        items:
-          $ref: '#/definitions/dto.CountryRequest'
-        type: array
-      gender:
-        type: string
       id:
         type: integer
       name:

@@ -90,24 +90,50 @@ func (s Service) Update(people serviceDto.UpdatePeople) error {
 	logrus.WithFields(logrus.Fields{
 		"ID":         people.ID,
 		"Name":       people.Name,
-		"Surname":    people.Name,
-		"Patronymic": people.Name,
-		"Age":        people.Age,
-		"Gender":     people.Gender,
-		"Country":    convertCountry(people.Country),
+		"Surname":    people.Surname,
+		"Patronymic": people.Patronymic,
 	}).Info("Service - Update")
+
 	p := dto.UpdatePeople{
 		ID:         people.ID,
-		Name:       people.Name,
-		Surname:    people.Name,
-		Patronymic: people.Name,
-		Age:        people.Age,
-		Gender:     people.Gender,
-		Country:    convertCountry(people.Country),
+		Surname:    people.Surname,
+		Patronymic: people.Patronymic,
 	}
+
 	logrus.WithFields(logrus.Fields{
 		"UpdateDto": p,
 	}).Info("Service - Conversion of serviceDto.UpdatePeople to repDto.UpdatePeople")
+
+	currentDto, err := s.peopleRepository.GetById(people.ID)
+	if err != nil {
+		return err
+	}
+
+	if currentDto.Name != p.Name {
+		response, err := s.externalRepository.GetByName(people.Name)
+		if err != nil {
+			logrus.Errorf("Error adding people: %v", err)
+			return err
+		}
+
+		countryInfoList := make([]dto.Country, 0, len(response.Country))
+		for _, countryInfo := range response.Country {
+			countryInfoList = append(countryInfoList, dto.Country{
+				CountryID:   countryInfo.CountryID,
+				Probability: countryInfo.Probability,
+			})
+		}
+
+		p.Name = response.Name
+		p.Gender = response.Gender
+		p.Age = response.Age
+		p.Country = countryInfoList
+
+		err = s.peopleRepository.DeleteCountry(dto.DeletePeople{Id: people.ID})
+		if err != nil {
+			return err
+		}
+	}
 
 	return s.peopleRepository.Update(p)
 }
@@ -138,18 +164,4 @@ func (s Service) Add(people serviceDto.CreatePeople) error {
 		Age:        response.Age,
 		Country:    countryInfoList,
 	})
-}
-
-func convertCountry(countryDto []serviceDto.Country) []dto.Country {
-	var countries []dto.Country
-
-	for _, country := range countryDto {
-		country := dto.Country{
-			CountryID:   country.CountryID,
-			Probability: country.Probability,
-		}
-		countries = append(countries, country)
-	}
-
-	return countries
 }

@@ -11,9 +11,6 @@ type UpdatePeopleRequest struct {
 	Name       string `json:"name,omitempty"`
 	Surname    string `json:"surname,omitempty"`
 	Patronymic string `json:"patronymic,omitempty"`
-	Age        int
-	Gender     string           `json:"gender,omitempty"`
-	Country    []CountryRequest `json:"country,omitempty"`
 }
 
 type CountryRequest struct {

@@ -239,20 +239,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.CountryRequest": {
-            "type": "object",
-            "properties": {
-                "country-id": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "probability": {
-                    "type": "number"
-                }
-            }
-        },
         "dto.CountryResponse": {
             "type": "object",
             "properties": {
@@ -321,18 +307,6 @@ const docTemplate = `{
         "dto.UpdatePeopleRequest": {
             "type": "object",
             "properties": {
-                "age": {
-                    "type": "integer"
-                },
-                "country": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dto.CountryRequest"
-                    }
-                },
-                "gender": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
