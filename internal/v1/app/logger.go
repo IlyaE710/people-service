@@ -1,7 +1,9 @@
 package app
 
 import (
+	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/sirupsen/logrus"
+	"net"
 	"os"
 )
 
@@ -14,4 +16,12 @@ func SetupLogger() {
 	} else {
 		logrus.SetLevel(logLevel)
 	}
+
+	conn, err := net.Dial("tcp", "localhost:5000")
+	if err != nil {
+		logrus.Fatal(err)
+	}
+
+	hook := logrustash.New(conn, &logrus.JSONFormatter{})
+	logrus.AddHook(hook)
 }
