@@ -17,9 +17,11 @@ func SetupLogger() {
 		logrus.SetLevel(logLevel)
 	}
 
-	conn, err := net.Dial("tcp", "localhost:5000")
+	host, port := os.Getenv("LOG_HOST"), os.Getenv("LOG_PORT")
+	conn, err := net.Dial("tcp", host+":"+port)
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Error(err)
+		return
 	}
 
 	hook := logrustash.New(conn, &logrus.JSONFormatter{})
