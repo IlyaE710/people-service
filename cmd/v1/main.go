@@ -1,13 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"os"
 	_ "people/docs"
 	"people/internal/v1/app"
-	"people/internal/v1/handler/people"
 )
 
 // @title           Swagger Example API
@@ -26,31 +23,23 @@ import (
 // @BasePath  /api
 
 func main() {
-	r := gin.Default()
-	logrus.SetFormatter(&logrus.TextFormatter{})
-	logrus.SetLevel(logrus.InfoLevel)
-	serviceLocator := app.NewServiceLocator()
-	db, err := serviceLocator.Db.DB()
+	app.SetupEnvironment()
+	app.SetupLogger()
+
+	db, err := app.SetupDatabase()
 	if err != nil {
-		panic(err)
-	}
-	defer db.Close()
-	peopleHandler := people.NewPeopleHandler(serviceLocator.PeopleService)
-
-	v1 := r.Group("api/v1")
-	{
-		v1people := v1.Group("/people")
-		{
-			v1people.POST("/", peopleHandler.Create)
-			v1people.GET("/", peopleHandler.GetAll)
-			v1people.GET("/:name", peopleHandler.GetPeopleByName)
-			v1people.PUT("/", peopleHandler.Update)
-			v1people.DELETE("/:id", peopleHandler.Delete)
-		}
+		logrus.Fatal("failed to set up database:", err)
 	}
 
-	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	serviceLocator := app.NewServiceLocator(db)
 
-	logrus.Info("Запуск сервера")
-	r.Run(":8080")
+	r := app.SetupServer(*serviceLocator)
+
+	addr := os.Getenv("SERVER_ADDRESS")
+	if addr == "" {
+		addr = ":8080"
+	}
+
+	logrus.Infof("Запуск сервера на адресе %s", addr)
+	r.Run(addr)
 }

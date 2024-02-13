@@ -2,15 +2,58 @@ version: '3'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:${DB_VERSION}
     environment:
-      POSTGRES_DB: db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - elk
+
+  logstash:
+    image: logstash:${LOG_VERSION}
+    ports:
+      - "${LOG_PORT}:5000"
+    volumes:
+      - ./config/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+      - logstash_data:/path/in/container/to/logstash/data
+    depends_on:
+      - elasticsearch
+    networks:
+      - elk
+
+  elasticsearch:
+    image: elasticsearch:${ELASTICSEARCH_VERSION}
+    ports:
+      - "${ELASTICSEARCH_PORT}:9200"
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - elk
+
+  kibana:
+    image: kibana:${KIBANA_VERSION}
+    ports:
+      - "${KIBANA_PORT}:5601"
+    depends_on:
+      - elasticsearch
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+    networks:
+      - elk
 
 volumes:
   postgres_data:
+  kibana_data:
+  logstash_data:
+  elasticsearch_data:
+
+networks:
+  elk:
+    driver: bridge

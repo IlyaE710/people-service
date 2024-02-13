@@ -15,9 +15,9 @@ type UpdatePeople struct {
 	Name       string
 	Surname    string
 	Patronymic string
-	Country    []Country
 	Age        int
 	Gender     string
+	Country    []Country
 }
 
 type DeletePeople struct {

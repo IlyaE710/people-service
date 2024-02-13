@@ -22,44 +22,37 @@ import (
 func (h *PeopleHandler) Update(c *gin.Context) {
 	var updateRequest dto.UpdatePeopleRequest
 	if err := c.ShouldBindJSON(&updateRequest); err != nil {
+		logrus.Errorf("Invalid request payload: %v", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Invalid request payload"})
 		return
 	}
 
-	// Преобразование UpdatePeopleRequest в dto.UpdatePeople
+	logrus.WithFields(logrus.Fields{
+		"ID":         updateRequest.ID,
+		"Name":       updateRequest.Name,
+		"Surname":    updateRequest.Surname,
+		"Patronymic": updateRequest.Patronymic,
+	}).Info("Received UpdatePeopleRequest")
+
 	updateDto := serviceDro.UpdatePeople{
 		ID:         updateRequest.ID,
 		Name:       updateRequest.Name,
 		Surname:    updateRequest.Surname,
-		Age:        updateRequest.Age,
-		Gender:     updateRequest.Gender,
 		Patronymic: updateRequest.Patronymic,
-		Country:    convertCountryRequests(updateRequest.Country),
 	}
 
-	logrus.Info("Преобразование UpdatePeopleRequest в dto.UpdatePeople", updateDto)
-	// Вызов метода PeopleService.Update с dto.UpdatePeople
+	logrus.WithFields(logrus.Fields{
+		"UpdateDto": updateDto,
+	}).Info("Converted UpdatePeopleRequest to dto.UpdatePeople")
+
 	err := h.PeopleService.Update(updateDto)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Errorf("Failed to update people: %v", err)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: "Failed to update people"})
 		return
 	}
 
+	logrus.Info("People updated successfully")
+
 	c.JSON(http.StatusOK, gin.H{"message": "People updated successfully"})
-}
-
-// convertCountryRequests конвертирует []handlerDto.CountryRequest в []dto.Country.
-func convertCountryRequests(countryRequests []dto.CountryRequest) []serviceDro.Country {
-	var countries []serviceDro.Country
-
-	for _, countryRequest := range countryRequests {
-		country := serviceDro.Country{
-			CountryID:   countryRequest.CountryID,
-			Probability: countryRequest.Probability,
-		}
-		countries = append(countries, country)
-	}
-
-	return countries
 }

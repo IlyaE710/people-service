@@ -16,13 +16,42 @@ func NewRepository(db *gorm.DB) *Repository {
 	return &Repository{db: db}
 }
 
+func (r *Repository) GetById(ID int) (*dto.People, error) {
+	logrus.WithFields(logrus.Fields{
+		"ID": ID,
+	}).Info("Repository - GetById")
+	model := entity.People{}
+
+	if err := r.db.Where("id = ?", ID).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logrus.Warnf("Person not found by id: %s", ID)
+			return nil, err
+		}
+		logrus.Errorf("Error retrieving person by id: %v", err)
+		return nil, err
+	}
+
+	return &dto.People{
+		ID:         model.ID,
+		Name:       model.Name,
+		Surname:    model.Surname,
+		Patronymic: model.Patronymic,
+	}, nil
+}
+
 func (r *Repository) GetByName(name string) (*dto.People, error) {
+	logrus.WithFields(logrus.Fields{
+		"Name": name,
+	}).Info("Repository - GetByName")
 	model := entity.People{}
 
 	if err := r.db.Where("name = ?", name).Preload("Country").First(&model).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
+			logrus.Warnf("Person not found by name: %s", name)
 			return nil, err
 		}
+		logrus.Errorf("Error retrieving person by name: %v", err)
+		return nil, err
 	}
 
 	result := &dto.People{
@@ -47,9 +76,11 @@ func (r *Repository) GetByName(name string) (*dto.People, error) {
 }
 
 func (r *Repository) GetAll() ([]*dto.People, error) {
+	logrus.Info("Repository - GetAll")
 	var models []entity.People
 
 	if err := r.db.Find(&models).Error; err != nil {
+		logrus.Errorf("Error retrieving all people: %v", err)
 		return nil, err
 	}
 
@@ -67,25 +98,34 @@ func (r *Repository) GetAll() ([]*dto.People, error) {
 }
 
 func (r *Repository) Delete(person dto.DeletePeople) error {
+	logrus.WithFields(logrus.Fields{
+		"ID": person.Id,
+	}).Info("Repository - Delete")
 	return r.db.Where("id = ?", person.Id).Delete(&entity.People{}).Error
 }
 
 func (r *Repository) Update(person dto.UpdatePeople) error {
+	logrus.WithFields(logrus.Fields{
+		"UpdatePeople": person,
+	}).Info("Repository - Update")
 	model := entity.People{
 		ID:         person.ID,
 		Name:       person.Name,
 		Surname:    person.Surname,
 		Patronymic: person.Patronymic,
-		Age:        person.Age,
 		Gender:     person.Gender,
+		Age:        person.Age,
 		Country:    convertCountry(person.Country),
 	}
 
 	logrus.Info("Преобразование repDto.UpdatePeople в entity.People", model)
-	return r.db.Session(&gorm.Session{FullSaveAssociations: true}).Updates(&model).Error
+	return r.db.Updates(&model).Error
 }
 
 func (r *Repository) Add(person dto.CreatePeople) error {
+	logrus.WithFields(logrus.Fields{
+		"CreatePeople": person,
+	}).Info("Repository - Add")
 	model := entity.People{
 		Name:       person.Name,
 		Surname:    person.Surname,
@@ -95,6 +135,11 @@ func (r *Repository) Add(person dto.CreatePeople) error {
 		Country:    convertCountry(person.Country),
 	}
 	return r.db.Create(&model).Error
+}
+
+func (r *Repository) DeleteCountry(people dto.DeletePeople) error {
+	return r.db.Where("people_id = ?", people.Id).Delete(&entity.Country{}).Error
+
 }
 
 func convertCountry(countryDto []dto.Country) []entity.Country {

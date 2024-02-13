@@ -3,6 +3,7 @@ package people
 import (
 	"errors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 	"net/http"
 	"people/internal/v1/handler/people/dto"
@@ -26,18 +27,25 @@ func (h *PeopleHandler) Delete(c *gin.Context) {
 
 	id, err := strconv.Atoi(idParam)
 	if err != nil {
+		logrus.Errorf("Invalid ID format: %v", err)
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{Message: "Invalid ID format"})
 		return
 	}
+	logrus.WithFields(logrus.Fields{
+		"ID": id,
+	}).Info("Received DeletePeopleRequest")
 	errS := h.PeopleService.Delete(serviceDto.DeletePeople{ID: id})
 	if errors.Is(errS, gorm.ErrRecordNotFound) {
+		logrus.Warnf("Record not found for deletion: ID %d", id)
 		c.JSON(http.StatusNotFound, dto.ErrorResponse{Message: "Record not found"})
 		return
 	}
 	if errS != nil {
+		logrus.Errorf("Error deleting person: %v", errS)
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{Message: "Internal Server Error"})
 		return
 	}
 
+	logrus.Info("Person deleted successfully")
 	c.Status(http.StatusNoContent)
 }
